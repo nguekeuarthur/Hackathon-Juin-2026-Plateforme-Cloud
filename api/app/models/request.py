@@ -1,9 +1,8 @@
 from sqlalchemy import Column, String, DateTime, Integer, Enum as SAEnum
-from sqlalchemy.ext.declarative import declarative_base
+from app.database import Base
 from datetime import datetime
 import enum, uuid
 
-Base = declarative_base()
 
 class RequestStatus(str, enum.Enum):
     PENDING   = "pending"
