@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+*.egg-info/
+.env
+
+# Node
+node_modules/
+.next/
+.env.local
+
+# Terraform / OpenTofu
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+.terraform.lock.hcl
+
+# Ansible
+*.retry
+infra/ansible/inventories/*/hosts
+
+# OS
+.DS_Store
+*.swp

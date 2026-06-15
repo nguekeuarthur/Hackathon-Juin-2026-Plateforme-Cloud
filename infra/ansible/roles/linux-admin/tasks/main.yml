@@ -1,0 +1,17 @@
+---
+- name: Mise à jour des paquets
+  apt: { update_cache: yes, upgrade: safe }
+
+- name: Installation outils Linux Admin
+  apt:
+    name: [vim, git, curl, wget, htop, tmux, net-tools, nmap, fail2ban, ufw, openssh-server, bash-completion, man-db]
+    state: present
+
+- name: Activation fail2ban
+  service: { name: fail2ban, enabled: yes, state: started }
+
+- name: UFW - autoriser SSH
+  ufw: { rule: allow, port: "22", proto: tcp }
+
+- name: Activation UFW
+  ufw: { state: enabled, policy: deny }

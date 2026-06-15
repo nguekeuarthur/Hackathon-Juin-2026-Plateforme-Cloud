@@ -1,0 +1,17 @@
+---
+- name: Mise à jour des paquets
+  apt: { update_cache: yes }
+
+- name: Ajout repo Node.js 20
+  shell: curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+
+- name: Installation Node.js
+  apt: { name: nodejs, state: present }
+
+- name: Installation outils Dev Web
+  apt:
+    name: [git, vim, curl, python3, python3-pip, docker.io, docker-compose-plugin]
+    state: present
+
+- name: Activation Docker
+  service: { name: docker, enabled: yes, state: started }

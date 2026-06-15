@@ -1,0 +1,8 @@
+---
+- name: Provisioning VM GIT
+  hosts: "{{ target_host }}"
+  become: yes
+  vars:
+    course_template: "{{ template | default('linux-admin') }}"
+  roles:
+    - role: "{{ course_template }}"
