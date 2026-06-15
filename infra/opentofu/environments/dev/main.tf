@@ -15,13 +15,48 @@ provider "openstack" {
   region      = var.os_region
 }
 
-module "vm_test" {
+# Réseaux isolés par cours
+resource "openstack_networking_network_v2" "course_networks" {
+  for_each       = toset(["linux-admin", "dev-web", "data-science", "cybersec"])
+  name           = "net-${each.key}"
+  admin_state_up = true
+}
+
+resource "openstack_networking_subnet_v2" "course_subnets" {
+  for_each   = openstack_networking_network_v2.course_networks
+  name       = "subnet-${each.key}"
+  network_id = each.value.id
+  cidr = lookup({
+    "linux-admin"  = "10.10.1.0/24"
+    "dev-web"      = "10.10.2.0/24"
+    "data-science" = "10.10.3.0/24"
+    "cybersec"     = "10.10.4.0/24"
+  }, each.key)
+  ip_version = 4
+}
+
+# VM 1 — linux-admin
+module "vm_linux" {
   source        = "../../modules/vm"
-  name          = "git-vm-test"
+  name          = "git-vm-linux-admin"
   key_pair_name = var.key_pair_name
-  network_name  = var.network_name
+  network_name  = openstack_networking_network_v2.course_networks["linux-admin"].name
   course        = "linux-admin"
   owner_email   = "test@git.ch"
   ends_at       = "2026-06-26T18:00:00Z"
   request_id    = "test-001"
+  depends_on    = [openstack_networking_subnet_v2.course_subnets]
+}
+
+# VM 2 — dev-web
+module "vm_devweb" {
+  source        = "../../modules/vm"
+  name          = "git-vm-dev-web"
+  key_pair_name = var.key_pair_name
+  network_name  = openstack_networking_network_v2.course_networks["dev-web"].name
+  course        = "dev-web"
+  owner_email   = "test@git.ch"
+  ends_at       = "2026-06-26T18:00:00Z"
+  request_id    = "test-002"
+  depends_on    = [openstack_networking_subnet_v2.course_subnets]
 }
