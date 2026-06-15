@@ -31,5 +31,5 @@ les deux VMs ne peuvent pas se joindre — isolation confirmée.
 
 ## Conséquences
 - Chaque cours est dans son propre réseau L2
-- Pas de trafic croisé entre classes possible
+- Pas de trafic croisé entre classes possible 
 - Les réseaux sont créés une seule fois au déploiement initial

@@ -60,3 +60,29 @@ module "vm_devweb" {
   request_id    = "test-002"
   depends_on    = [openstack_networking_subnet_v2.course_subnets]
 }
+# Routeur connecté au réseau externe
+resource "openstack_networking_router_v2" "main_router" {
+  name                = "git-router"
+  admin_state_up      = true
+  external_network_id = "0f9c3806-bd21-490f-918d-4a6d1c648489"
+}
+
+# Connexion réseau linux-admin au routeur
+resource "openstack_networking_router_interface_v2" "linux_admin_iface" {
+  router_id = openstack_networking_router_v2.main_router.id
+  subnet_id = openstack_networking_subnet_v2.course_subnets["linux-admin"].id
+}
+
+# IP flottante pour la VM linux-admin
+resource "openstack_networking_floatingip_v2" "vm_linux_fip" {
+  pool       = "ext-floating1"
+  depends_on = [openstack_networking_router_interface_v2.linux_admin_iface]
+}
+
+resource "openstack_compute_floatingip_associate_v2" "vm_linux_fip_assoc" {
+  floating_ip = openstack_networking_floatingip_v2.vm_linux_fip.address
+  instance_id = module.vm_linux.vm_id
+}
+output "vm_linux_public_ip" {
+  value = openstack_networking_floatingip_v2.vm_linux_fip.address
+}
