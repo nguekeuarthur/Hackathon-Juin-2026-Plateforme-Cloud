@@ -1,97 +1,36 @@
-# GIT VM Platform
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Plateforme de provisioning de machines virtuelles en libre-service pour le Geneva Institute of Technology.
+## Getting Started
 
-## Stack technique
-
-| Composant | Technologie |
-|-----------|-------------|
-| Frontend | Next.js (React) |
-| Backend | FastAPI (Python) |
-| Infrastructure | OpenTofu + Infomaniak Public Cloud (OpenStack) |
-| Configuration | Ansible |
-| Base de données | PostgreSQL |
-| Monitoring | Prometheus + Grafana |
-| Auth | OIDC / Microsoft Entra ID |
-
-## Prérequis
-
-- Python 3.11+
-- Node.js 20+
-- OpenTofu 1.7+
-- Ansible 2.15+
-- Un compte Infomaniak Public Cloud avec accès API OpenStack
-- Un tenant Microsoft Entra ID (dev ou production)
-
-## Déploiement depuis zéro
-
-### 1. Cloner le dépôt
+First, run the development server:
 
 ```bash
-git clone https://github.com/<org>/git-vm-platform.git
-cd git-vm-platform
-```
-
-### 2. Infrastructure (OpenTofu)
-
-```bash
-cd infra/opentofu/environments/dev
-cp terraform.tfvars.example terraform.tfvars
-# Remplir les variables Infomaniak
-tofu init
-tofu plan
-tofu apply
-```
-
-### 3. API (FastAPI)
-
-```bash
-cd api
-python -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
-cp .env.example .env
-# Remplir les variables d'environnement
-uvicorn app.main:app --reload
-```
-
-### 4. Frontend (Next.js)
-
-```bash
-cd frontend
-npm install
-cp .env.local.example .env.local
-# Remplir NEXTAUTH_URL, AZURE_CLIENT_ID, etc.
 npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
 ```
 
-### 5. Ansible (configuration des VMs)
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-```bash
-cd infra/ansible
-ansible-galaxy install -r requirements.yml
-# Les playbooks sont appelés automatiquement par l'API après provisioning
-```
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Structure du dépôt
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-```
-.
-├── infra/
-│   ├── opentofu/        # Infrastructure as Code
-│   └── ansible/         # Configuration des VMs
-├── api/                 # Backend FastAPI
-├── frontend/            # Portail Next.js
-└── docs/
-    ├── adr/             # Décisions d'architecture
-    ├── guides/          # Guides utilisateurs
-    └── runbook/         # Exploitation
-```
+## Learn More
 
-## Équipe
+To learn more about Next.js, take a look at the following resources:
 
-| Rôle | Responsabilité |
-|------|----------------|
-| Lead Infra | OpenTofu, Ansible, réseau OpenStack |
-| Lead Dev | FastAPI, BDD, auth OIDC, scheduler |
-| Frontend | Next.js, portail étudiant/validateur |
-| QA / Doc | Tests, guides, backlog |
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
