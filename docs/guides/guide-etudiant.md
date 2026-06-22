@@ -74,4 +74,3 @@ Une nouvelle demande de validation sera envoyée.
 Si vous rencontrez des problèmes :
 - Contactez votre formateur
 - Envoyez un message via l'onglet "Support" de la plateforme
-
