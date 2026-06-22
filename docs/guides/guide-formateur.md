@@ -54,3 +54,4 @@ Chaque étudiant recevra une notification et pourra accéder à sa VM une fois l
 5. Validez.
 
 Une notification sera envoyée à l'étudiant.
+
