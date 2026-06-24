@@ -1,14 +1,55 @@
 from fastapi import APIRouter, HTTPException, Depends, BackgroundTasks
 from sqlalchemy.orm import Session
-from app.database import get_db
+from app.database import get_db, SessionLocal
 from app.security import get_current_user
 from app.models.request import VMRequest, RequestStatus
 from app.schemas.request import RequestCreate, RequestValidate, RequestResponse
 from app.services.email import send_approval_email, send_rejection_email
+from app.services.provisioning import run_terraform_provision
 from typing import List
 from datetime import datetime, timezone
+import logging
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
+
+def process_approved_request(request_id: int):
+    """Tâche d'arrière-plan pour provisionner la VM via Terraform et envoyer l'e-mail."""
+    db = SessionLocal()
+    try:
+        db_request = db.query(VMRequest).filter(VMRequest.id == request_id).first()
+        if not db_request:
+            logger.error(f"Demande {request_id} introuvable pour le provisionnement.")
+            return
+
+        # 1. Provisionner la VM via Terraform
+        short_id = str(db_request.id)[:8]
+        template_val = getattr(db_request.template, "value", str(db_request.template))
+        vm_name = f"vm-{short_id}-{template_val.replace(' ', '-').lower()}"
+        logger.info(f"Démarrage du provisionnement pour {vm_name}")
+        
+        tf_result = run_terraform_provision(vm_name=vm_name)
+        ip_address = tf_result["ip"]
+        private_key = tf_result.get("private_key")
+        
+        # 2. Mettre à jour la base de données
+        db_request.vm_ip = ip_address
+        db.commit()
+        db.refresh(db_request)
+        
+        # 3. Envoyer l'e-mail avec la bonne IP et la clé SSH
+        send_approval_email(
+            to=db_request.requester,
+            vm_ip=ip_address,
+            vm_id=db_request.vm_id,
+            ends_at=db_request.ends_at.strftime("%Y-%m-%d %H:%M:%S UTC"),
+            private_key=private_key
+        )
+        logger.info(f"Processus d'approbation terminé avec succès pour la demande {request_id}.")
+    except Exception as e:
+        logger.error(f"Échec du processus de provisionnement pour la demande {request_id}: {str(e)}")
+    finally:
+        db.close()
 
 @router.post("/", response_model=RequestResponse)
 def create_request(
@@ -68,13 +109,10 @@ def validate_request(
     
     # Envoi de la notification e-mail
     if body.approved:
-        # TODO: Lancer OpenTofu / Ansible en background
+        # Lancer le provisionnement Terraform + Email en background
         background_tasks.add_task(
-            send_approval_email,
-            to=db_request.requester,
-            vm_ip=db_request.vm_ip,
-            vm_id=db_request.vm_id,
-            ends_at=db_request.ends_at.strftime("%Y-%m-%d %H:%M:%S UTC")
+            process_approved_request,
+            request_id=db_request.id
         )
     else:
         background_tasks.add_task(

@@ -26,3 +26,8 @@ infra/ansible/inventories/*/hosts
 *.swp
 *.pem
 create-issues.sh
+
+# Credentials
+PCU-*
+*.txt
+*.yaml

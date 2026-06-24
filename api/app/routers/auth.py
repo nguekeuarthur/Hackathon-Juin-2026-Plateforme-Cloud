@@ -5,6 +5,7 @@ import httpx
 from jose import jwt as jose_jwt
 from app.security import create_access_token
 from datetime import timedelta
+from urllib.parse import urlencode
 
 router = APIRouter()
 
@@ -14,6 +15,7 @@ AZURE_CLIENT_SECRET = os.getenv("AZURE_CLIENT_SECRET")
 MOCK_AUTH = os.getenv("MOCK_AUTH", "False").lower() in ("true", "1", "yes")
 
 REDIRECT_URI = "http://localhost:8000/auth/callback"
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:3000")
 
 @router.get("/login")
 def login():
@@ -34,9 +36,22 @@ def login():
     )
     return RedirectResponse(auth_url)
 
+@router.get("/mock-login/{role}")
+def mock_login(role: str):
+    """Endpoint pour tester rapidement avec un rôle spécifique (student, validator, formateur)."""
+    if not MOCK_AUTH:
+        raise HTTPException(status_code=403, detail="Mock auth désactivé")
+    code_map = {
+        "student": "mock_code_123",
+        "validator": "mock_code_validator",
+        "formateur": "mock_code_formateur",
+    }
+    code = code_map.get(role, "mock_code_123")
+    return RedirectResponse(url=f"{REDIRECT_URI}?code={code}")
+
 @router.get("/callback")
 async def callback(code: str):
-    """Reçoit le code OAuth2, échange contre un token, retourne un JWT interne."""
+    """Reçoit le code OAuth2, échange contre un token, redirige vers le frontend."""
     if MOCK_AUTH and code.startswith("mock_code"):
         # Valeurs simulées avec gestion des rôles
         if code == "mock_code_validator":
@@ -97,4 +112,7 @@ async def callback(code: str):
         expires_delta=access_token_expires
     )
     
-    return {"access_token": internal_token, "token_type": "bearer"}
+    # Redirection vers le frontend avec le token et le rôle
+    params = urlencode({"token": internal_token, "role": role})
+    redirect_url = f"{FRONTEND_URL}/auth/callback?{params}"
+    return RedirectResponse(url=redirect_url, status_code=302)

@@ -13,6 +13,8 @@ provider "openstack" {
   user_name   = var.os_username
   password    = var.os_password
   region      = var.os_region
+  user_domain_name    = "default"
+  project_domain_name = "default"
 }
 
 # Réseaux isolés par cours
