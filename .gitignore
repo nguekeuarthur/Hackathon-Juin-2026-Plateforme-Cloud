@@ -24,3 +24,5 @@ infra/ansible/inventories/*/hosts
 # OS
 .DS_Store
 *.swp
+*.pem
+create-issues.sh
