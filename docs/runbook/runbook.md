@@ -1,24 +1,14 @@
 # Runbook d'exploitation
 
 ## Une VM ne se provisionne pas
-1. `journalctl -u gitvm-api -f` → chercher l'erreur OpenTofu
-2. `cd infra/opentofu/environments/dev && tofu show` → état de l'infra
-3. Vérifier quota Infomaniak (dashboard Public Cloud)
-4. Relancer : `POST /admin/requests/{id}/retry`
 
-## Ajouter un template au catalogue
-1. Créer `infra/ansible/roles/<nom>/tasks/main.yml`
-2. Ajouter valeur dans `CourseTemplate` (enum `api/app/models/request.py`)
-3. Ajouter option dans le formulaire frontend
-4. Tester en dev, puis merger sur main
+**Objectif** : Diagnostiquer et résoudre un échec de provisionnement.
 
-## Demande bloquée en "pending"
-1. Vérifier que le validateur a reçu l'e-mail de notification
-2. Valider manuellement via `PATCH /requests/{id}/validate`
-3. Si récurrent : vérifier config SMTP dans `.env`
+**Prérequis** : Accès SSH au serveur, dashboard Infomaniak, ID requête.
 
-## Destruction manuelle d'une VM
+### Étapes
+
+1. **Consulter les logs**
 ```bash
-cd infra/opentofu/environments/dev
-tofu destroy -target=module.vm_<request_id>
-```
+journalctl -u gitvm-api -f
+cd infra/opentofu/environments/dev && tofu show
