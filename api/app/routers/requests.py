@@ -13,7 +13,7 @@ import logging
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-def process_approved_request(request_id: int):
+def process_approved_request(request_id: int, flavor_name: str, template_id: str):
     """Tâche d'arrière-plan pour provisionner la VM via Terraform et envoyer l'e-mail."""
     db = SessionLocal()
     try:
@@ -28,7 +28,7 @@ def process_approved_request(request_id: int):
         vm_name = f"vm-{short_id}-{template_val.replace(' ', '-').lower()}"
         logger.info(f"Démarrage du provisionnement pour {vm_name}")
         
-        tf_result = run_terraform_provision(vm_name=vm_name)
+        tf_result = run_terraform_provision(vm_name=vm_name, flavor_name=flavor_name, template_id=template_id)
         ip_address = tf_result["ip"]
         private_key = tf_result.get("private_key")
         
@@ -112,7 +112,9 @@ def validate_request(
         # Lancer le provisionnement Terraform + Email en background
         background_tasks.add_task(
             process_approved_request,
-            request_id=db_request.id
+            request_id=db_request.id,
+            flavor_name=body.flavor_name,
+            template_id=body.template_id
         )
     else:
         background_tasks.add_task(

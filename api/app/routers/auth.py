@@ -63,7 +63,7 @@ async def callback(code: str):
             name = "Mock Formateur"
             role = "formateur"
         else:
-            email = "student@git.ch"
+            email = "edimaevina@gmail.com"
             name = "Mock Student"
             role = "student"
     else:

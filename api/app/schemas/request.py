@@ -12,6 +12,8 @@ class RequestCreate(BaseModel):
 class RequestValidate(BaseModel):
     approved: bool
     comment: str = ""
+    flavor_name: Optional[str] = "a1-ram2-disk20-perf1"
+    template_id: Optional[str] = "1cb0a6a2-2dc2-46cd-bb23-1070d7f0e9d6"
 
 class RequestResponse(BaseModel):
     id: str

@@ -33,7 +33,7 @@ resource "openstack_networking_secgroup_rule_v2" "icmp_rule" {
 
 resource "openstack_compute_instance_v2" "vm" {
   name            = var.vm_name
-  flavor_name     = "a1-ram2-disk20-perf1"
+  flavor_name     = var.flavor_name
   image_id        = var.template_id
   key_pair        = openstack_compute_keypair_v2.keypair.name
   security_groups = [openstack_networking_secgroup_v2.sg.name]

@@ -90,11 +90,18 @@ export default async function Home({ searchParams }: Props) {
           )}
 
           <a
-            href={`${apiUrl}/auth/login`}
-            className="group flex items-center justify-center gap-4 w-full py-4 px-6 bg-white border-2 border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200 shadow-sm"
+            href={`${apiUrl}/auth/mock-login/student`}
+            className="group mb-4 flex items-center justify-center gap-4 w-full py-4 px-6 bg-white border-2 border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 hover:border-blue-600 focus:outline-none focus:ring-4 focus:ring-blue-100 transition-all duration-200 shadow-sm"
           >
             <MicrosoftLogo />
-            <span className="text-lg">Continuer avec Office 365</span>
+            <span className="text-lg">Connexion Élève</span>
+          </a>
+          
+          <a
+            href={`${apiUrl}/auth/mock-login/validator`}
+            className="group flex items-center justify-center gap-4 w-full py-4 px-6 bg-slate-900 border-2 border-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 hover:border-slate-800 focus:outline-none focus:ring-4 focus:ring-slate-200 transition-all duration-200 shadow-sm"
+          >
+            <span className="text-lg">Connexion Formateur (Test)</span>
           </a>
 
           <div className="mt-12 text-center">

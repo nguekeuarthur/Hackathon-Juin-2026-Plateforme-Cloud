@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 # Le dossier où se trouvent les fichiers .tf
 INFRA_DIR = Path(os.path.dirname(__file__)).parent.parent / "infrastructure"
 
-def run_terraform_provision(vm_name: str) -> dict:
+def run_terraform_provision(vm_name: str, flavor_name: str = "a1-ram2-disk20-perf1", template_id: str = "1cb0a6a2-2dc2-46cd-bb23-1070d7f0e9d6") -> dict:
     """
     Exécute Terraform pour créer la VM et retourne l'IP et la clé SSH.
     """
@@ -20,6 +20,8 @@ def run_terraform_provision(vm_name: str) -> dict:
     env = os.environ.copy()
     env["TF_VAR_os_password"] = password
     env["TF_VAR_vm_name"] = vm_name
+    env["TF_VAR_flavor_name"] = flavor_name
+    env["TF_VAR_template_id"] = template_id
 
     try:
         # 1. Initialize

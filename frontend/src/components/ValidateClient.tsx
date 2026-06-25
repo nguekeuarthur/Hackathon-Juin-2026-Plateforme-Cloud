@@ -50,6 +50,9 @@ export default function ValidateClient({ token, apiUrl }: Props) {
   const [loading, setLoading] = useState(true)
   const [rejectingId, setRejectingId] = useState<string | null>(null)
   const [rejectComment, setRejectComment] = useState('')
+  const [approvingId, setApprovingId] = useState<string | null>(null)
+  const [selectedImage, setSelectedImage] = useState('1cb0a6a2-2dc2-46cd-bb23-1070d7f0e9d6')
+  const [selectedFlavor, setSelectedFlavor] = useState('a1-ram2-disk20-perf1')
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [flash, setFlash] = useState<{ type: 'success' | 'error'; message: string } | null>(null)
 
@@ -66,7 +69,7 @@ export default function ValidateClient({ token, apiUrl }: Props) {
 
   useEffect(() => { fetchRequests() }, [fetchRequests])
 
-  async function sendDecision(id: string, approved: boolean, comment = '') {
+  async function sendDecision(id: string, approved: boolean, comment = '', flavor_name?: string, template_id?: string) {
     setProcessingId(id)
     setFlash(null)
     try {
@@ -76,12 +79,13 @@ export default function ValidateClient({ token, apiUrl }: Props) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ approved, comment }),
+        body: JSON.stringify({ approved, comment, flavor_name, template_id }),
       })
       if (!res.ok) throw new Error(`Erreur ${res.status}`)
       setFlash({ type: 'success', message: approved ? 'Demande approuvée.' : 'Demande refusée.' })
       setRejectingId(null)
       setRejectComment('')
+      setApprovingId(null)
       await fetchRequests()
     } catch {
       setFlash({ type: 'error', message: 'Une erreur est survenue. Veuillez réessayer.' })
@@ -90,8 +94,8 @@ export default function ValidateClient({ token, apiUrl }: Props) {
     }
   }
 
-  function handleApprove(id: string) {
-    sendDecision(id, true)
+  function handleApproveConfirm(id: string) {
+    sendDecision(id, true, '', selectedFlavor, selectedImage)
   }
 
   function handleRejectConfirm(id: string) {
@@ -167,7 +171,10 @@ export default function ValidateClient({ token, apiUrl }: Props) {
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-2">
                             <button
-                              onClick={() => handleApprove(r.id)}
+                              onClick={() => {
+                                setApprovingId(approvingId === r.id ? null : r.id)
+                                setRejectingId(null)
+                              }}
                               disabled={processingId === r.id}
                               className="px-3 py-1.5 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                             >
@@ -176,6 +183,7 @@ export default function ValidateClient({ token, apiUrl }: Props) {
                             <button
                               onClick={() => {
                                 setRejectingId(rejectingId === r.id ? null : r.id)
+                                setApprovingId(null)
                                 setRejectComment('')
                               }}
                               disabled={processingId === r.id}
@@ -186,6 +194,52 @@ export default function ValidateClient({ token, apiUrl }: Props) {
                           </div>
                         </td>
                       </tr>
+                      {approvingId === r.id && (
+                        <tr key={`${r.id}-approve`} className="bg-blue-50">
+                          <td colSpan={5} className="px-6 py-4">
+                            <div className="flex flex-wrap items-center gap-4">
+                              <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-700">Système d'exploitation</label>
+                                <select 
+                                  value={selectedImage}
+                                  onChange={(e) => setSelectedImage(e.target.value)}
+                                  className="rounded-lg border border-blue-200 px-3 py-1.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                >
+                                  <option value="1cb0a6a2-2dc2-46cd-bb23-1070d7f0e9d6">Ubuntu 22.04 LTS</option>
+                                  <option value="c03b8f35-78e9-40dc-9208-9625c2a98756">Debian 12 Bookworm</option>
+                                </select>
+                              </div>
+                              <div className="flex flex-col gap-1">
+                                <label className="text-xs font-semibold text-gray-700">Puissance (RAM)</label>
+                                <select 
+                                  value={selectedFlavor}
+                                  onChange={(e) => setSelectedFlavor(e.target.value)}
+                                  className="rounded-lg border border-blue-200 px-3 py-1.5 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                >
+                                  <option value="a1-ram2-disk20-perf1">2 Go RAM (Standard)</option>
+                                  <option value="a1-ram4-disk20-perf1">4 Go RAM (Avancé)</option>
+                                  <option value="a1-ram8-disk20-perf1">8 Go RAM (Performance)</option>
+                                </select>
+                              </div>
+                              <div className="ml-auto flex items-center gap-2">
+                                <button
+                                  onClick={() => handleApproveConfirm(r.id)}
+                                  disabled={processingId === r.id}
+                                  className="px-4 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                  Confirmer la création
+                                </button>
+                                <button
+                                  onClick={() => setApprovingId(null)}
+                                  className="px-3 py-2 text-xs font-semibold text-gray-500 hover:text-gray-700 transition-colors"
+                                >
+                                  Annuler
+                                </button>
+                              </div>
+                            </div>
+                          </td>
+                        </tr>
+                      )}
 
                       {rejectingId === r.id && (
                         <tr key={`${r.id}-reject`} className="bg-red-50">
